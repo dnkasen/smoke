@@ -1,0 +1,35 @@
+Get the code
+----------------------------
+copy over the code
+cp /project/projectdirs/training/HIPACC_2011/kasen/smoke.tar.gz ./
+
+copy it into your directory and untar it
+tar -zxvf smoke.tar.gz
+
+Compile the code
+-------------------------------
+you need the gnu scientific library (gsl).  On hopper, use:
+module load gsl
+
+Or download at compile it at
+http://www.gnu.org/software/gsl/
+
+go into the src/ directory and type "make"
+
+copy over the executable
+cp smoke ../run
+
+Run the code
+----------------------------
+
+edit hopper.run batch file and
+qsub hopper.run
+
+
+Output of the code, columns
+--------------------------
+time(days) [mu=cos(theta)]  [phi]  optical_lum  gamma-ray_dep  gamma-ray_lum  ni56_lum  particle count
+
+All luminosities and depositions in ergs/sec
+The [mu] column will only appear if the number of theta viewing angles is n_mu > 1
+Same for phi
