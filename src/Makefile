@@ -1,36 +1,26 @@
-#- 
-#- File    : Makefile
-#- ------------------
 
+CXX=CC -O3 -fastsse -static
 
-
-# put your own GSL directory and compiler here if you want
-#GSL_DIR   = /global/software/centos-5.x86_64/modules/gsl/1.9-intel/gsl-1.9/
-#CXX   = mpicxx 
-
-CXX   = CC
-
-
-GSL_INC=$(GSL_DIR)/include
-GSL_LIB=$(GSL_DIR)/lib
-
-CCOPT = -I$(GSL_INC) 
-CLOPT = -L$(GSL_LIB) -lgsl -lgslcblas
-
+GSL_BASE=$(GSL_DIR)
+GSL_INCL=-I$(GSL_BASE)/include
+GSL_LDFLAGS=-L$(GSL_BASE)/lib
+GSL_LIBS=-lgsl
 
 TARGET = smoke
 
 OBJECTS = main.o grid.o transport.o spectrum.o radioactive.o
 
 $(TARGET): $(OBJECTS)
-	$(CXX) -o $(TARGET) $(OBJECTS) $(CLOPT) $(FLIB)
+	$(CXX) $(GSL_LDFLAGS) -o $(TARGET) $(OBJECTS) $(GSL_LIBS)
 
 .cc.o: 
-	$(CXX) $(CCOPT) -c -o $@ $<
+	$(CXX) $(GSL_INCL) -c -o $@ $<
 
 .c.o: 
 	cc -I. -c -o $@ $<
 
 clean:
-	rm -f $(OBJECTS) smoke
+	rm -f $(OBJECTS)
 
+realclean: clean
+	rm -f $(TARGET)
