@@ -1,3 +1,6 @@
+
+#include <limits>
+
 #include <mpi.h>
 #include <gsl/gsl_rng.h>
 #include <time.h>
@@ -164,7 +167,7 @@ void TRANSPORT::Propogate(PARTICLE &p, double dt)
     
     // step size to next interaction event
     d_sc  = tau_r/opac;
-    if (opac == 0) d_sc = INFINITY;
+    if (opac == 0) d_sc = std::numeric_limits< double >::infinity();
    
     // find distance to end of time step
     d_tm = (tstop - p.t)*DAY_TO_SEC*C_LIGHT;
