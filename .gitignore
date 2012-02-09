@@ -1,0 +1,6 @@
+smoke
+*.e*
+*.o*
+*.mod
+*.dat
+*.run

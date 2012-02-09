@@ -79,7 +79,7 @@ double TRANSPORT::Step(double t_step)
   {
     // check if particles are overflowing buffer
     if (i >= MAX_PARTICLES) {
-      printf("particles overflowing buffer; stoping %d %d\n",n_particles,MAX_PARTICLES);
+      printf("particles overflowing buffer; stopping %ld %d\n",n_particles,MAX_PARTICLES);
       exit(1); }
 
     //    printf("GO %d\n",i);
@@ -260,7 +260,11 @@ void TRANSPORT::Compton_Scatter(PARTICLE &p)
   }
 
   // new gamma-ray energy (i.e., frequency)
-  if (p.type == gammaray) p.E_x = p.E_x*E_ratio;
+  if (p.type == gammaray) {
+    // printf("Compton scatter: dump %le MeV into zone %d\n", p.E_x-p.E_x*E_ratio, p.ind);
+    grid->add_edep(p.ind, p.E_x - p.E_x*E_ratio);
+    p.E_x = p.E_x*E_ratio;
+  }
   
   // sample whether we stay alive, if not become a photon
   double y = gsl_rng_uniform(rangen);
@@ -446,7 +450,7 @@ void TRANSPORT::Rebuffer_Particles()
   n_particles = n_pbuffer;
   n_living_particles = n_particles;
 
-  if (verbose) printf(" - done %d \n",n_particles);
+  if (verbose) printf(" - done %ld \n",n_particles);
   
 }
   

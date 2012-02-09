@@ -206,5 +206,5 @@ int main(int argc, char **argv)
   if (verbose) 
     printf("#\n# CALCULATION took %.3f minutes (%.2f hours)\n",
 	   time_wasted,time_wasted/60.0);
-  
+  grid.show_dep();
 }

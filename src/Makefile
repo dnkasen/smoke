@@ -5,10 +5,10 @@
 
 
 # put your own GSL directory and compiler here if you want
-#GSL_DIR   = /global/software/centos-5.x86_64/modules/gsl/1.9-intel/gsl-1.9/
-#CXX   = mpicxx 
+GSL_DIR   = $(HOME)/gsl-1.15/intel-12.1.2
+CXX   = mpicxx
 
-CXX   = CC
+#CXX   = CC
 
 
 GSL_INC=$(GSL_DIR)/include

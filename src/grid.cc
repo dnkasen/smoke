@@ -62,6 +62,8 @@ void GRID::Read(const char *infile)
 	z[ind].rho     = x1;
 	z[ind].ni_frac = x2;
 	z[ind].mu_e    = x3;
+
+	z[ind].edep    = 0.0;
 	
 	tmass    += z[ind].rho*vol;
 	ni_mass  += z[ind].rho*z[ind].ni_frac*vol;
@@ -69,6 +71,7 @@ void GRID::Read(const char *infile)
 	double vy = (j*dx - x_cen)/(t_begin*DAY_TO_SEC);
 	double vz = (k*dx - x_cen)/(t_begin*DAY_TO_SEC);
 	double vv = vx*vx + vy*vy + vz*vz;
+	z[ind].vel = sqrt(vv);
 	ke    += 0.5*z[ind].rho*vol*vv;
 	ind++;
       }
