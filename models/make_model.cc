@@ -61,6 +61,7 @@ int main(void)
         double vr = sqrt(vx*vx + vy*vy + vz*vz);
 
         // set composition
+<<<<<<< HEAD
         double m   = rho*4.0*M_PI/3.0*r*r*r/GSL_CONST_CGSM_SOLAR_MASS;
 	double ni_comp = 1.0;
 	if (m > Mni_in)  ni_comp = 1.0 - (m - Mni_in)/(Mni_out - Mni_in);
@@ -73,4 +74,3 @@ int main(void)
         fprintf(out,"%14.4e %14.4e %14.4e\n ",d,ni_comp,mu);
       }
 }
- 

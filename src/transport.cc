@@ -1,3 +1,4 @@
+#include <limits>
 #include <mpi.h>
 #include <gsl/gsl_rng.h>
 #include <time.h>
@@ -164,7 +165,7 @@ void TRANSPORT::Propogate(PARTICLE &p, double dt)
     
     // step size to next interaction event
     d_sc  = tau_r/opac;
-    if (opac == 0) d_sc = INFINITY;
+    if (opac == 0) d_sc = std::numeric_limits< double >::infinity();
    
     // find distance to end of time step
     d_tm = (tstop - p.t)*DAY_TO_SEC*C_LIGHT;
@@ -260,6 +261,7 @@ void TRANSPORT::Compton_Scatter(PARTICLE &p)
   }
 
   // new gamma-ray energy (i.e., frequency)
+<<<<<<< HEAD
   if (p.type == gammaray) {
     // printf("Compton scatter: dump %le MeV into zone %d\n", p.E_x-p.E_x*E_ratio, p.ind);
     grid->add_edep(p.ind, p.E_x - p.E_x*E_ratio);
@@ -450,8 +452,8 @@ void TRANSPORT::Rebuffer_Particles()
   n_particles = n_pbuffer;
   n_living_particles = n_particles;
 
+<<<<<<< HEAD
   if (verbose) printf(" - done %ld \n",n_particles);
-  
 }
   
 

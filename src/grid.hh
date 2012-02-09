@@ -11,7 +11,6 @@ public:
   float mu_e;     // number of electrons per particle
   double edep;    // energy deposited due to Compton scatters
   double vel;     // velocity of zone
-
 };
 
 //-------------------------------------------------
@@ -52,6 +51,7 @@ public:
   double Get_dx() {return dx; }
   double Get_Density(int i) { return z[i].rho; }
   double Get_mu_e(int i) {return z[i].mu_e; }
+<<<<<<< HEAD
   double Get_vel(int i) {return z[i].vel; }
 
   // add energy to the zone during a Compton scatter
@@ -71,6 +71,5 @@ public:
   }
 
 };
-
 
 #endif
