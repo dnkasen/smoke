@@ -80,6 +80,7 @@ void GRID::Read(const char *infile)
                     double vy = (j*dx - x_cen)/(t_begin*DAY_TO_SEC);
                     double vz = (k*dx - x_cen)/(t_begin*DAY_TO_SEC);
                     double vv = vx*vx + vy*vy + vz*vz;
+                    z[ind].vel = sqrt(vv);
                     ke    += 0.5*z[ind].rho*vol*vv;
                     ind++;
                 }

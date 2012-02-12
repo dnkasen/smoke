@@ -51,7 +51,7 @@ public:
   double Get_dx() {return dx; }
   double Get_Density(int i) { return z[i].rho; }
   double Get_mu_e(int i) {return z[i].mu_e; }
-<<<<<<< HEAD
+
   double Get_vel(int i) {return z[i].vel; }
 
   // add energy to the zone during a Compton scatter
@@ -60,12 +60,17 @@ public:
     return;
   }
 
+  double Get_edep(int i) {
+    return z[i].edep;
+  }
+
   // print gamma-ray energy deposition information
-  void show_dep() {
-    for (int i = 0; i < n_zones; i++) {
-      if (z[i].edep != 0) {
-        printf("%d %le %le\n", i, z[i].vel/1.0e5, z[i].edep);
-      }
+  void show_dep(FILE *pfile, double coarse_vel_grid[], double coarse_vel_grid_e[]) {
+    int array_size = sizeof(coarse_vel_grid)/sizeof(double);
+    fprintf(pfile, "hello from show_dep. The array passed has %d elements\n", array_size);
+    fprintf(pfile, "%15s %15s %15s\n", "ZONE", "VEL (KM/S)", "E DEP (MeV)");
+    for (int i = 0; i < 256; i++) {
+      fprintf(pfile, "%15d %15lf %15lf\n", i, coarse_vel_grid[i], coarse_vel_grid_e[i]);
     }
     return;
   }
