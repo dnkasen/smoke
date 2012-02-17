@@ -33,3 +33,16 @@ time(days) [mu=cos(theta)]  [phi]  optical_lum  gamma-ray_dep  gamma-ray_lum  ni
 All luminosities and depositions in ergs/sec
 The [mu] column will only appear if the number of theta viewing angles is n_mu > 1
 Same for phi
+
+
+Gamma-ray deposition
+--------------------
+
+The code also dumps a file called dep.dat. The columns are
+
+----------------------------------------
+velocity (km/s)   energy deposited (MeV)
+      ...                   ...
+----------------------------------------
+
+Currently it maps the 3-D results to 1-D spherical.
