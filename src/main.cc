@@ -15,6 +15,10 @@
 #define N_COARSE_VEL_GRID 256
 #define COARSE_VEL_MAX 15000
 
+/* I think you probably don't have to do this in C++, but I'm still
+ * learning C... */
+int compare_times(const void *, const void *);
+
 //--------------------------------------------------------
 // The main code
 //--------------------------------------------------------
@@ -36,12 +40,14 @@ int main(int argc, char **argv)
 
   // initialize MPI parallelism
   int my_rank,n_procs;
+  const int rank_root = 0;
   MPI_Init( &argc, &argv );
-  time_t proc_start_tp, proc_end_tp; // see if workload is balanced
-  time(&proc_start_tp);
+  // timers to see if workload is balanced
+  double proc_time_start, proc_time_end, proc_time;
+  proc_time_start = MPI_Wtime();
   MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
   MPI_Comm_size( MPI_COMM_WORLD, &n_procs);
-  if (my_rank == 0) verbose = 1;
+  if (my_rank == rank_root) verbose = 1;
   if (verbose) printf("\n# Using %d MPI cores\n\n",n_procs);
 
   // create coarse(r) 1-D spherical velocity grid on which to interpolate
@@ -49,14 +55,9 @@ int main(int argc, char **argv)
   double *coarse_vel_grid, *coarse_vel_grid_e;
   coarse_vel_grid   = new double[N_COARSE_VEL_GRID];
   coarse_vel_grid_e = new double[N_COARSE_VEL_GRID];
-
-  if (verbose) {
-//    printf("%15s %15s", "SHELL INDEX", "VEL (KM/S)\n");
-    for (int i = 0; i < N_COARSE_VEL_GRID; i++) {
-      coarse_vel_grid[i] = COARSE_VEL_MAX*(double(i)/N_COARSE_VEL_GRID);
-      coarse_vel_grid_e[i] = 0.0;
-//      printf("%15d %15lf\n", i, coarse_vel_grid[i]);
-    }
+  for (int i = 0; i < N_COARSE_VEL_GRID; i++) {
+    coarse_vel_grid[i] = COARSE_VEL_MAX*(double(i)/N_COARSE_VEL_GRID);
+    coarse_vel_grid_e[i] = 0.0;
   }
 
   // open up the parameter file
@@ -175,8 +176,8 @@ int main(int argc, char **argv)
   if (verbose) 
   {
     printf("#\n");
-    printf("#    step      time         dt       n_living   n_total   exec time(sec)"); 
-    printf("#\n");
+    printf("%1s %7s %9s %10s %14s %9s %17s\n", "#", "step", "time", "dt",
+           "n_living", "n_total", "exec time(sec)#");
   }
   
   // loop over time steps;   
@@ -215,83 +216,124 @@ int main(int argc, char **argv)
   transport.spectrum.MPI_Average_All();
   transport.spectrum.Normalize();
 
-  // interpolate from fine grid to coarse grid
-  if (verbose) printf("interpolating onto coarse velocity grid...\n");
-  // right now this is done with a linear search. trees would be waaaaaaay
-  // more efficient...
-  for (int i = 0; i < N_COARSE_VEL_GRID; i++) {
-    for (int j = 0; j < grid.Get_n_zones(); j++) {
-      if ((grid.Get_vel(j)/1.0e5 > coarse_vel_grid[i]) &&
-          (grid.Get_vel(j)/1.0e5 <= coarse_vel_grid[i+1]))
-        { coarse_vel_grid_e[i] += grid.Get_edep(j); }
-    }
-  }
-  if (verbose) printf("interpolation complete!\n");
+  int i, j;
 
   double *tot_coarse_vel_grid_e;
   tot_coarse_vel_grid_e = new double[N_COARSE_VEL_GRID];
 
+  double *vel_grid_e, *tot_vel_grid_e;
+  vel_grid_e     = new double[grid.Get_n_zones()];
+  tot_vel_grid_e = new double[grid.Get_n_zones()];
+
+  /* this is stupid to store the deposition data twice, but I don't know
+   * how to do an MPI_Reduce on members of a class */
+  for (i = 0; i < grid.Get_n_zones(); i++) {
+    vel_grid_e[i] = grid.Get_edep(i);
+    tot_vel_grid_e[i] = 0.0;
+  }
+
   double edep_sum = 0.0;
 
-  for (int i = 0; i < N_COARSE_VEL_GRID; i++) {
-    edep_sum += coarse_vel_grid_e[i];
+  for (i = 0; i < N_COARSE_VEL_GRID; i++) {
+    tot_coarse_vel_grid_e[i] = 0.0;
   }
-  printf("Before MPI_Reduce, on process %d, edep_sum = %lf\n",
-         my_rank, edep_sum);
+
+  for (i = 0; i < grid.Get_n_zones(); i++) {
+    edep_sum += vel_grid_e[i];
+  }
 
   int error;
-  error = MPI_Reduce(coarse_vel_grid_e, tot_coarse_vel_grid_e,
-                     N_COARSE_VEL_GRID, MPI_DOUBLE, MPI_SUM, 0,
+  error = MPI_Reduce(vel_grid_e, tot_vel_grid_e,
+                     grid.Get_n_zones(), MPI_DOUBLE, MPI_SUM, 0,
 		     MPI_COMM_WORLD);
-  if (verbose) {
-    printf("MPI_Reduce returned error: ");
-    switch (error) {
-      case MPI_SUCCESS:
-        printf("MPI_SUCCESS\n");
-        break;
-      case MPI_ERR_COMM:
-        printf("MPI_ERR_COMM\n");
-        break;
-      case MPI_ERR_TYPE:
-        printf("MPI_ERR_TYPE\n");
-        break;
-      case MPI_ERR_BUFFER:
-        printf("MPI_ERR_BUFFER\n");
-        break;
-      default:
-        printf("Unknown MPI error flag\n");
-        break;
-    }
-  }
+  if (error != MPI_SUCCESS)
+    if (verbose)
+      printf("ERROR: MPI_Reduce failed!\n");
 
   edep_sum = 0.0;
 
   if (verbose) {
-    for (int i = 0; i < N_COARSE_VEL_GRID; i++) {
-      edep_sum += tot_coarse_vel_grid_e[i];
+    for (i = 0; i < grid.Get_n_zones(); i++) {
+      edep_sum += tot_vel_grid_e[i];
     }
-    printf("After MPI_Reduce, edep_sum = %lf\n", edep_sum);
   }
 
-  time(&proc_end_tp);
-  float proc_time_wasted = difftime(proc_end_tp, proc_start_tp)/60.0;
-  printf("process %d took %.2f minutes\n", my_rank, proc_time_wasted);
+  // interpolate from fine grid to coarse grid
+  if (verbose) {
+    // right now this is done with a linear search. trees would be way
+    // faster...
+    for (i = 0; i < N_COARSE_VEL_GRID; i++) {
+      for (j = 0; j < grid.Get_n_zones(); j++) {
+        if ((grid.Get_vel(j)/1.0e5 > coarse_vel_grid[i]) &&
+            (grid.Get_vel(j)/1.0e5 <= coarse_vel_grid[i+1]) &&
+            (tot_vel_grid_e[j] > 0.0)) {
+          tot_coarse_vel_grid_e[i] += tot_vel_grid_e[j];
+        }
+      }
+    }
+  }
   if (verbose) transport.spectrum.Print();
 
   // finish up mpi
-  MPI_Finalize();
-  
+  proc_time_end = MPI_Wtime();
+  proc_time = proc_time_end - proc_time_start;
+
+  /* Now let's practice with trees. We'll compare the longest and shortest
+   * process times using a binary tree sort from libc. */
+
+  /* first we gather all the process times into a single array on the
+   * master process */
+  int gsize;
+  MPI_Comm_size(MPI_COMM_WORLD, &gsize);
+  double *all_proc_times;
+  if (verbose ) { all_proc_times = new double[gsize]; }
+  MPI_Gather(&proc_time, 1, MPI_DOUBLE, all_proc_times, 1, MPI_DOUBLE,
+             rank_root, MPI_COMM_WORLD);
+
+  // now sort!
+  if (verbose)
+    { qsort(all_proc_times, gsize, sizeof(double), compare_times); }
+
+  if (verbose) {
+    FILE *pfile;
+    pfile = fopen("dep.dat", "w");
+    fprintf(pfile, "%15s %15s\n", "VEL (km/s)", "DEP (MeV)");
+    for (i = 0; i < N_COARSE_VEL_GRID; i++) {
+      fprintf(pfile, "%15e %15e\n", coarse_vel_grid[i],
+              tot_coarse_vel_grid_e[i]);
+    }
+    fclose(pfile);
+  }
 
   // calculate the elapsed time 
   time(&end_tp);
   float time_wasted=difftime(end_tp,start_tp)/60.0;
   if (verbose) {
-    printf("#\n# CALCULATION took %.3f minutes (%.2f hours)\n",
+    printf("#\n# CALCULATION took %.2f minutes (%.3f hours)\n",
 	   time_wasted,time_wasted/60.0);
-    FILE *pfile;
-    pfile = fopen("dep.dat", "w");
-    grid.show_dep(pfile, coarse_vel_grid, coarse_vel_grid_e);
-    fclose(pfile);
+    printf("slowest process time: %.3f min\n", all_proc_times[0] / 60.0);
+    printf("fastest process time: %.3f min\n", all_proc_times[gsize-1] / 60.0);
   }
-  delete coarse_vel_grid, coarse_vel_grid_e, tot_coarse_vel_grid_e;
+  delete coarse_vel_grid, coarse_vel_grid_e, tot_coarse_vel_grid_e,
+         vel_grid_e, tot_vel_grid_e;
+  if (verbose) { delete all_proc_times; }
+
+  MPI_Finalize();
+
+  return 0;
+}
+
+// function needed by qsort to compare process times
+int compare_times(const void *time1, const void *time2) {
+  double dtime1 = *(double *)time1;
+  double dtime2 = *(double *)time2;
+  int result;
+  if (dtime2 > dtime1) {
+    result = 1;
+  } else if (dtime2 < dtime1) {
+    result = -1;
+  } else if (dtime2 == dtime1) {
+    result = 0;
+  }
+  return result;
 }

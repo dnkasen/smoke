@@ -63,18 +63,6 @@ public:
   double Get_edep(int i) {
     return z[i].edep;
   }
-
-  // print gamma-ray energy deposition information
-  void show_dep(FILE *pfile, double coarse_vel_grid[], double coarse_vel_grid_e[]) {
-    int array_size = sizeof(coarse_vel_grid)/sizeof(double);
-    fprintf(pfile, "hello from show_dep. The array passed has %d elements\n", array_size);
-    fprintf(pfile, "%15s %15s %15s\n", "ZONE", "VEL (KM/S)", "E DEP (MeV)");
-    for (int i = 0; i < 256; i++) {
-      fprintf(pfile, "%15d %15lf %15lf\n", i, coarse_vel_grid[i], coarse_vel_grid_e[i]);
-    }
-    return;
-  }
-
 };
 
 #endif

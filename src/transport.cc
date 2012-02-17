@@ -26,6 +26,8 @@ TRANSPORT::TRANSPORT()
 //--------------------------------------------------------
 void TRANSPORT::Init()
 {
+
+
   // default values
   grey_opac = 0.0;
   n_living_particles = 0;
@@ -80,7 +82,8 @@ double TRANSPORT::Step(double t_step)
   {
     // check if particles are overflowing buffer
     if (i >= MAX_PARTICLES) {
-      printf("particles overflowing buffer; stopping %ld %d\n",n_particles,MAX_PARTICLES);
+      printf("particles overflowing buffer; stopping %ld %d\n",
+             n_particles, MAX_PARTICLES);
       exit(1); }
 
     //    printf("GO %d\n",i);
@@ -262,7 +265,6 @@ void TRANSPORT::Compton_Scatter(PARTICLE &p)
 
   // new gamma-ray energy (i.e., frequency)
   if (p.type == gammaray) {
-    // printf("Compton scatter: dump %le MeV into zone %d\n", p.E_x-p.E_x*E_ratio, p.ind);
     grid->add_edep(p.ind, p.E_x - p.E_x*E_ratio);
     p.E_x = p.E_x*E_ratio;
   }
