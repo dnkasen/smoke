@@ -82,8 +82,7 @@ double TRANSPORT::Step(double t_step)
   /*
   int my_rank;
   MPI_Comm_rank( MPI_COMM_WORLD, &my_rank ); */
-  #pragma omp parallel default(shared) private(i)
-  #pragma omp for schedule(static)
+  #pragma omp for private(i)
   /* printf("total number of threads on process %ld: %ld\n", my_rank,
          omp_get_num_threads()); */
   for (i = 0; i < n_particles; i++)

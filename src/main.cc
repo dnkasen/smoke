@@ -182,6 +182,7 @@ int main(int argc, char **argv)
   }
   
   // loop over time steps;   
+  #pragma omp parallel default(shared)
   for (int it = 0; it < n_times; it++)
   {
     // get this time step
@@ -193,13 +194,15 @@ int main(int argc, char **argv)
         t_step = t*tstep_del;
      
     // printout time step
-    if (verbose) printf("%8d %12.4e %12.4e %8d %8d ",it,t,t_step,
+    if (verbose && (omp_get_thread_num() == 0))
+      printf("%8d %12.4e %12.4e %8d %8d ",it,t,t_step,
 			transport.num_living_particles(),
 			transport.num_particles());
 
     // Propogate the particles
     double t_exec = transport.Step(t_step); 
-    if (verbose) printf("       %.3e\n",t_exec);
+    if (verbose && (omp_get_thread_num() == 0))
+      printf("       %.3e\n",t_exec);
     
     // homologously expand the grid
     double efac = (t + t_step)/t;
