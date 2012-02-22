@@ -11,6 +11,7 @@
 #include "transport.hh"
 #include "radioactive.hh"
 #include <vector>
+#include <omp.h>
 
 #define N_COARSE_VEL_GRID 256
 #define COARSE_VEL_MAX 15000
@@ -66,12 +67,12 @@ int main(int argc, char **argv)
 
   //--------------------------------------
   // default values of input parameters
-  double tstep_min   = 0;
-  double tstep_max   = 1;
+  double tstep_min   = 0.0;
+  double tstep_max   = 1.0;
   double tstep_del   = 0.2;
   double opacity     = 0.1;
-  double t_delta     = 1;
-  double t_stop      = 50;
+  double t_delta     = 1.0;
+  double t_stop      = 50.0;
   int    n_times     = 1000;
   int    n_mu        = 1;
   int    n_phi       = 1;
@@ -167,7 +168,7 @@ int main(int argc, char **argv)
 
   if (verbose)
     printf("# Sending around %.4e particles per MPI process (%.4e total)\n",
-	   1.0*n_photons/n_procs, 1.0*n_photons);
+	   (double)n_photons/(double)n_procs, (double)n_photons);
 
   // start off at beginning time
   double t = grid.Get_t_begin();
@@ -181,13 +182,15 @@ int main(int argc, char **argv)
   }
   
   // loop over time steps;   
-  for (int it=0;it<n_times;it++)
+  for (int it = 0; it < n_times; it++)
   {
     // get this time step
     double t_step = tstep_max;
     if (t_step < tstep_min) t_step = tstep_min;
     if (t_step > tstep_max) t_step = tstep_max;
-    if ((tstep_del > 0)&&(t > 0)) if (t_step > t*tstep_del) t_step = t*tstep_del;
+    if ((tstep_del > 0.0) && (t > 0.0))
+      if (t_step > t*tstep_del)
+        t_step = t*tstep_del;
      
     // printout time step
     if (verbose) printf("%8d %12.4e %12.4e %8d %8d ",it,t,t_step,

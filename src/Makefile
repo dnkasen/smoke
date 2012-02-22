@@ -1,6 +1,6 @@
 
 #CXX=CC -O3 -fastsse -static
-CXX=mpicxx -O3
+CXX=mpicxx -O3 -openmp
 GSL_DIR=/home5/baker/friesen/gsl-1.15/intel-12.1.2
 
 GSL_BASE=$(GSL_DIR)

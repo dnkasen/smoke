@@ -10,6 +10,7 @@
 #include "physical_constants.hh"
 #include "transport.hh"
 #include "radioactive.hh"
+#include <omp.h>
 
 
 //--------------------------------------------------------
@@ -78,12 +79,21 @@ double TRANSPORT::Step(double t_step)
   // --------------------------------------------------------------
   // Propogate the particles
   // --------------------------------------------------------------
-  for (i=0;i<n_particles;i++)
+  int my_rank;
+  MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
+  #pragma omp parallel for private(i) schedule(dynamic) default(shared)
+  /* printf("total number of threads on process %ld: %ld\n", my_rank,
+         omp_get_num_threads()); */
+  for (i = 0; i < n_particles; i++)
   {
+    /* printf("sending particle %ld on process %d on thread %d...\n",
+           i, my_rank, omp_get_thread_num()); */
     // check if particles are overflowing buffer
     if (i >= MAX_PARTICLES) {
-      printf("particles overflowing buffer; stopping %ld %d\n",
+      printf("particles overflowing buffer: ");
+      printf("n_particles = %ld, MAX_PARTICLES = %ld\n",
              n_particles, MAX_PARTICLES);
+      printf("stopping...\n");
       exit(1); }
 
     //    printf("GO %d\n",i);
