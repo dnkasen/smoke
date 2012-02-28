@@ -1,14 +1,14 @@
 #PBS -S /bin/tcsh
 #PBS -N smoke
 #PBS -q debug
-#PBS -l mppwidth=512
-#PBS -l walltime=00:10:00
+#PBS -l mppwidth=72
+#PBS -l walltime=00:29:59
 #PBS -j eo
 
 cd $PBS_O_WORKDIR
 
 echo Starting `date`
 
-aprun -n 512 ./smoke param.dat > job.out
+aprun -n 12 -N 4 -d 6 -S 1 -ss smoke param.dat > job.out
 
 echo Ending `date`
