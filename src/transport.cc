@@ -79,30 +79,29 @@ double TRANSPORT::Step(double t_step)
   // --------------------------------------------------------------
   // Propogate the particles
   // --------------------------------------------------------------
-  /*
-  int my_rank;
-  MPI_Comm_rank( MPI_COMM_WORLD, &my_rank ); */
-  #pragma omp for private(i)
-  /* printf("total number of threads on process %ld: %ld\n", my_rank,
-         omp_get_num_threads()); */
-  for (i = 0; i < n_particles; i++)
+  #pragma omp parallel private(i)
   {
-    /* printf("sending particle %ld on process %d on thread %d...\n",
-           i, my_rank, omp_get_thread_num()); */
-    // check if particles are overflowing buffer
-    if (i >= MAX_PARTICLES) {
-      printf("particles overflowing buffer: ");
-      printf("n_particles = %ld, MAX_PARTICLES = %ld\n",
-             n_particles, MAX_PARTICLES);
-      printf("stopping...\n");
-      exit(1); }
+    #pragma omp for schedule(dynamic)
+    for (i = 0; i < n_particles; i++)
+    {
+      // check if particles are overflowing buffer
+      if (i >= MAX_PARTICLES && omp_get_thread_num() == 0) {
+        printf("particles overflowing buffer: ");
+        printf("n_particles = %ld, MAX_PARTICLES = %ld\n",
+               n_particles, MAX_PARTICLES);
+        printf("stopping...\n");
+        exit(1); }
 
-    //    printf("GO %d\n",i);
-    // propogate a single particle and count if escaped
-    if (particle[i].fate == alive) Propogate(particle[i],t_step);
+      //    printf("GO %d\n",i);
+      // propogate a single particle and count if escaped
+      if (particle[i].fate == alive) Propogate(particle[i],t_step);
     
-    // count living particles
-    if (particle[i].fate == alive) n_living_particles++;
+      // count living particles
+      if (particle[i].fate == alive) {
+        #pragma omp atomic
+        n_living_particles++;
+      }
+    }
   }
   // --------------------------------------------------------------
 

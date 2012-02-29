@@ -56,7 +56,7 @@ public:
 
   // add energy to the zone during a Compton scatter
   void add_edep(int i, double energy) {
-  #pragma omp atomic
+    #pragma omp atomic
     z[i].edep += energy;
     return;
   }

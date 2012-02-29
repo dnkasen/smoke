@@ -182,7 +182,6 @@ int main(int argc, char **argv)
   }
   
   // loop over time steps;   
-  #pragma omp parallel default(shared)
   for (int it = 0; it < n_times; it++)
   {
     // get this time step
