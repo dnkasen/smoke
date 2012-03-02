@@ -6,9 +6,9 @@ class ZONE
 
 public:
 
-  float rho;      // mass density (g cm^(-3))
-  float ni_frac;  // 56ni mass fraction
-  float mu_e;     // number of electrons per particle
+  double rho;     // mass density (g cm^(-3))
+  double ni_frac; // 56ni mass fraction
+  double mu_e;    // number of electrons per particle
   double edep;    // energy deposited due to Compton scatters
   double vel;     // velocity of zone
 };

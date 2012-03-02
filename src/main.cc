@@ -135,7 +135,7 @@ int main(int argc, char **argv)
     printf("t_stop    = %.4e\n",t_stop);
     printf("t_delta   = %.4e\n",t_delta);
     printf("opacity   = %.4e\n",opacity);
-    printf("n_photons = %.4e\n",(float)n_photons);
+    printf("n_photons = %.4e\n",double(n_photons));
     printf("step_size = %.4f\n",step_size);
     printf("n_mu      = %d\n",n_mu);
     printf("n_phi     = %d\n",n_phi);
@@ -312,7 +312,7 @@ int main(int argc, char **argv)
 
   // calculate the elapsed time 
   time(&end_tp);
-  float time_wasted=difftime(end_tp,start_tp)/60.0;
+  double time_wasted=difftime(end_tp,start_tp)/60.0;
   if (verbose) {
     printf("#\n# CALCULATION took %.2f minutes (%.3f hours)\n",
 	   time_wasted,time_wasted/60.0);

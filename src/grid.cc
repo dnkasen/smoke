@@ -106,9 +106,9 @@ void GRID::Read(const char *infile)
     MPI_Bcast( &t_begin, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
     MPI_Bcast( &ni_mass, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
 
-    float* rho_buffer     = new float [ n_zones ];
-    float* ni_frac_buffer = new float [ n_zones ];
-    float* mu_e_buffer    = new float [ n_zones ];
+    double* rho_buffer     = new double [ n_zones ];
+    double* ni_frac_buffer = new double [ n_zones ];
+    double* mu_e_buffer    = new double [ n_zones ];
 
     if( my_rank == 0 )
     {
