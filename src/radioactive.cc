@@ -96,12 +96,11 @@ double RADIOACTIVE::Sample_Ni56_Wavelength(double time, gsl_rng *rangen)
   }
   else
   {
-    while (true)
+    // put 2% of energy into positrons
+    double z4 = gsl_rng_uniform(rangen);
+    if (z4 < 0.02) return -1;
+    else  while (true)
     {
-      // put 2% of energy into positrons
-      double z4 = gsl_rng_uniform(rangen);
-      if (z4 < 0.02) return -1;
-
       double z2 = gsl_rng_uniform(rangen);
       double z3 = gsl_rng_uniform(rangen);
       d = (int)(n_co56_decays*z2);
