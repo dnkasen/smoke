@@ -1,14 +1,14 @@
 
-CXX=CC -O3 -fastsse -Mipa=fast -static
+CXX=CC -O3 -fastsse -static
 
 GSL_BASE=$(GSL_DIR)
 GSL_INCL=-I$(GSL_BASE)/include
 GSL_LDFLAGS=-L$(GSL_BASE)/lib
 GSL_LIBS=-lgsl
 
-TARGET = smoke
+TARGET = make_model
 
-OBJECTS = main.o grid.o transport.o spectrum.o radioactive.o
+OBJECTS = $(TARGET).o
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(GSL_LDFLAGS) -o $(TARGET) $(OBJECTS) $(GSL_LIBS)
@@ -20,7 +20,7 @@ $(TARGET): $(OBJECTS)
 	cc -I. -c -o $@ $<
 
 clean:
-	rm -f $(OBJECTS) *.oo
+	rm -f $(OBJECTS)
 
 realclean: clean
 	rm -f $(TARGET)
